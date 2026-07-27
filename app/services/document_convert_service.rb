@@ -42,36 +42,47 @@ class DocumentConvertService
       return Result.new(success?: false, error_message: "Unsupported file type. Only PDF and PowerPoint (.pptx) files are supported.")
     end
 
+    if @document.file.byte_size > Document::MAX_PPTX_BYTES
+      return Result.new(
+        success?: false,
+        error_message: "PowerPoint file is too large for safe conversion on this server (limit: #{Document::MAX_PPTX_BYTES / 1.megabyte}MB)."
+      )
+    end
+
     Dir.mktmpdir("doc_convert_#{@document.id}_") do |dir|
       input_path  = stage_input(dir)
       profile_dir = build_profile_dir
       FileUtils.mkdir_p(profile_dir)
 
-      cmd = [
-        soffice_binary,
-        "--headless",
-        "--norestore", "--nolockcheck", "--nodefault", "--nofirststartwizard",
-        "-env:UserInstallation=file:///#{to_url_path(profile_dir)}",
-        "--convert-to", "pdf",
-        "--outdir", dir,
-        input_path
-      ]
+      begin
+        cmd = [
+          soffice_binary,
+          "--headless",
+          "--norestore", "--nolockcheck", "--nodefault", "--nofirststartwizard",
+          "-env:UserInstallation=file:///#{to_url_path(profile_dir)}",
+          "--convert-to", "pdf",
+          "--outdir", dir,
+          input_path
+        ]
 
-      stdout, stderr, status = run_with_timeout(cmd)
-      unless status.success?
-        return Result.new(
-          success?: false,
-          error_message: conversion_error("LibreOffice exited #{status.exitstatus}", stdout, stderr)
-        )
+        stdout, stderr, status = run_with_timeout(cmd)
+        unless status.success?
+          return Result.new(
+            success?: false,
+            error_message: conversion_error("LibreOffice exited #{status.exitstatus}", stdout, stderr)
+          )
+        end
+
+        produced = produced_pdf_path(dir, input_path)
+        unless produced
+          return Result.new(success?: false, error_message: conversion_error("LibreOffice did not produce a PDF", stdout, stderr))
+        end
+
+        attach_produced_pdf(produced)
+        Result.new(success?: true, pdf_path: produced)
+      ensure
+        FileUtils.rm_rf(profile_dir)
       end
-
-      produced = produced_pdf_path(dir, input_path)
-      unless produced
-        return Result.new(success?: false, error_message: conversion_error("LibreOffice did not produce a PDF", stdout, stderr))
-      end
-
-      attach_produced_pdf(produced)
-      Result.new(success?: true, pdf_path: produced)
     end
   rescue Timeout::Error
     Result.new(success?: false, error_message: "convert timed out after #{TIMEOUT_SECONDS}s")
@@ -100,7 +111,13 @@ class DocumentConvertService
     ext = File.extname(@document.original_filename).to_s.downcase
     ext = ".bin" if ext.empty?
     path = File.join(dir, "input#{ext}")
-    File.open(path, "wb") { |f| f.write(@document.file.download) }
+
+    File.open(path, "wb") do |file|
+      @document.file.open do |io|
+        IO.copy_stream(io, file)
+      end
+    end
+
     path
   end
 

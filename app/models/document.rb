@@ -7,7 +7,8 @@ class Document < ApplicationRecord
     application/vnd.openxmlformats-officedocument.presentationml.presentation
   ].freeze
 
-  MAX_BYTES = 50.megabytes
+  MAX_PDF_BYTES = 50.megabytes
+  MAX_PPTX_BYTES = 15.megabytes
   STATUSES = %w[pending processing ready failed].freeze
 
   attr_reader :file_password
@@ -122,10 +123,13 @@ class Document < ApplicationRecord
 
     unless ALLOWED_CONTENT_TYPES.include?(file.content_type)
       errors.add(:file, "must be .pptx or .pdf")
+      return
     end
 
-    if file.byte_size >= MAX_BYTES
-      errors.add(:file, "must be less than 50MB")
+    if powerpoint? && file.byte_size > MAX_PPTX_BYTES
+      errors.add(:file, "must be less than #{MAX_PPTX_BYTES / 1.megabyte}MB for PowerPoint conversion")
+    elsif pdf? && file.byte_size > MAX_PDF_BYTES
+      errors.add(:file, "must be less than #{MAX_PDF_BYTES / 1.megabyte}MB")
     end
   end
 end
