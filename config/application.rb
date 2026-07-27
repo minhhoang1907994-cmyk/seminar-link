@@ -42,6 +42,11 @@ require "action_view/railtie"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Explicitly require these since they're marked `require: false` in the Gemfile
+require "solid_cache"
+require "solid_queue"
+require "solid_cable"
+
 module SeminarLink
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
