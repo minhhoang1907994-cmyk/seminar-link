@@ -21,9 +21,20 @@ test:
   database: storage/test.sqlite3
 
 production:
-  url: <%= ENV["DATABASE_URL"] %>
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  encoding: unicode
+  primary:
+    url: <%= ENV["DATABASE_URL"] %>
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+    encoding: unicode
+
+  cable:
+    url: <%= ENV["DATABASE_URL"] %>
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+    encoding: unicode
+
+  queue:
+    url: <%= ENV["DATABASE_URL"] %>
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+    encoding: unicode
   cache:
     <<: *default
     database: storage/production_cache.sqlite3
