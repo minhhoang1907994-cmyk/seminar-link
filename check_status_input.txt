@@ -1,0 +1,10 @@
+doc = Document.order(id: :desc).first
+puts "ID: #{doc.id}"
+puts "Filename: #{doc.original_filename}"
+puts "Status: #{doc.status}"
+puts "Error: #{doc.error_message}"
+puts "Attempts: #{doc.conversion_attempts}"
+puts "Created: #{doc.created_at}"
+puts "File attached: #{doc.file.attached?}"
+puts "PDF attached: #{doc.slides_pdf.attached?}"
+exit

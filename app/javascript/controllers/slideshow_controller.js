@@ -23,7 +23,7 @@ export default class extends Controller {
     this.boundWakeToolbar = this.wakeToolbar.bind(this)
 
     pdfjsLib
-      .getDocument({ url: this.urlValue, withCredentials: false })
+      .getDocument({ url: this.urlValue, withCredentials: true })
       .promise.then((pdf) => {
         this.pdf = pdf
         this.indicatorTarget.textContent = `1 / ${pdf.numPages}`

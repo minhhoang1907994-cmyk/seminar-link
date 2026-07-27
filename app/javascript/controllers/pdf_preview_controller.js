@@ -12,7 +12,7 @@ export default class extends Controller {
     pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URL
 
     pdfjsLib
-      .getDocument({ url: this.urlValue, withCredentials: false })
+      .getDocument({ url: this.urlValue, withCredentials: true })
       .promise.then((pdf) => {
         this.pdf = pdf
         if (this.hasMetaTarget) this.metaTarget.textContent = `${pdf.numPages} trang`
