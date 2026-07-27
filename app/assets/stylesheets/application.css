@@ -315,6 +315,7 @@ a:hover { text-decoration: underline; }
 .badge {
   display: inline-flex;
   align-items: center;
+  white-space: nowrap;
   min-height: 1.5rem;
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
