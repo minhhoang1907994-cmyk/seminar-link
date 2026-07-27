@@ -1,0 +1,47 @@
+<section class="page-shell">
+  <div class="page-heading">
+    <div>
+      <p class="page-kicker">Seminar Link</p>
+      <h1 class="page-title">Upload tài liệu</h1>
+    </div>
+    <%= link_to "Danh sách", documents_path, class: "btn btn-secondary" %>
+  </div>
+
+  <%= form_with model: @document, multipart: true, class: "upload-form" do |f| %>
+    <% if @document.errors.any? %>
+      <div class="error-box">
+        <strong>Có lỗi:</strong>
+        <ul>
+          <% @document.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="field">
+      <%= f.label :uploader_name, "Tên của bạn", class: "field-label" %>
+      <%= f.text_field :uploader_name, class: "input", required: true, maxlength: 100, autofocus: true, placeholder: "Ví dụ: Anh Minh" %>
+    </div>
+
+    <div class="field">
+      <%= f.label :description, "Mô tả", class: "field-label" %>
+      <%= f.text_area :description, class: "input textarea", maxlength: 1000, rows: 4, placeholder: "Nội dung mô tả ngắn cho file" %>
+    </div>
+
+    <div class="field">
+      <%= f.label :file_password, "Mật khẩu của file", class: "field-label" %>
+      <%= f.password_field :file_password, class: "input", required: true, minlength: 4, maxlength: 100, placeholder: "Dùng để sửa hoặc xóa file này" %>
+    </div>
+
+    <div class="field">
+      <%= f.label :file, "File (.pptx / .pdf, tối đa 50MB)", class: "field-label" %>
+      <%= f.file_field :file, accept: ".pptx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation", class: "input-file" %>
+    </div>
+
+    <div class="form-actions">
+      <%= f.submit "Upload", class: "btn btn-primary" %>
+      <%= link_to "Hủy", documents_path, class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+</section>

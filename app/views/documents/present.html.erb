@@ -1,0 +1,20 @@
+<% content_for :title, "Trình chiếu: #{@document.original_filename}" %>
+<% content_for :presenter_layout, true %>
+
+<div class="presenter"
+     data-controller="slideshow"
+     data-slideshow-url-value="<%= rails_blob_url(@document.slides_pdf) %>">
+  <div class="presenter-toolbar">
+    <button class="tb-btn" data-action="slideshow#first" title="Trang đầu (Home)">«</button>
+    <button class="tb-btn" data-action="slideshow#prev" title="Trang trước (←)">‹</button>
+    <span class="tb-indicator" data-slideshow-target="indicator">— / —</span>
+    <button class="tb-btn" data-action="slideshow#next" title="Trang sau (→ hoặc Space)">›</button>
+    <button class="tb-btn" data-action="slideshow#last" title="Trang cuối (End)">»</button>
+    <button class="tb-btn" data-action="slideshow#fullscreen" title="Toàn màn hình (F)">⛶</button>
+    <span class="tb-filename"><%= @document.original_filename %></span>
+  </div>
+  <div class="presenter-canvas-wrap">
+    <canvas data-slideshow-target="canvas" class="slide-canvas"></canvas>
+  </div>
+  <div class="presenter-hint">Phím tắt: <kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> <kbd>Home</kbd> <kbd>End</kbd> <kbd>F</kbd></div>
+</div>

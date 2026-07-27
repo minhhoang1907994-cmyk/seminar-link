@@ -1,0 +1,96 @@
+<section class="page-shell" data-controller="document-actions">
+  <article class="doc-detail">
+    <div class="page-heading compact">
+      <div>
+        <p class="page-kicker">Chi tiết file</p>
+        <h1 class="page-title"><%= @document.original_filename %></h1>
+      </div>
+      <%= link_to "← Danh sách", documents_path, class: "btn btn-secondary" %>
+    </div>
+
+    <dl class="detail-list">
+      <dt>Người upload</dt>
+      <dd><%= @document.uploader_name %></dd>
+      <dt>Mô tả</dt>
+      <dd><%= @document.description.presence || content_tag(:span, "Không có mô tả", class: "text-muted") %></dd>
+      <dt>Trạng thái</dt>
+      <dd>
+        <span class="badge badge-<%= @document.status_badge_class %>"><%= @document.human_status %></span>
+      </dd>
+      <dt>Upload lúc</dt>
+      <dd><%= @document.created_at.strftime("%Y-%m-%d %H:%M:%S") %> (<%= time_ago_in_words(@document.created_at) %> trước)</dd>
+      <% if @document.failed? && @document.error_message.present? %>
+        <dt>Lỗi</dt>
+        <dd><pre class="error-pre"><%= @document.error_message %></pre></dd>
+      <% end %>
+    </dl>
+
+    <div class="detail-actions">
+      <% if @document.presentable? %>
+        <%= link_to "Mở trình chiếu", present_document_path(@document), class: "btn btn-primary", target: "_blank", rel: "noopener" %>
+      <% elsif @document.convertible? && (@document.failed? || @document.pending?) %>
+        <%= button_to "Convert lại", retry_convert_document_path(@document), method: :post, class: "btn btn-secondary" %>
+      <% end %>
+      <button type="button"
+              class="btn btn-secondary"
+              data-action="document-actions#openEdit"
+              data-document-id="<%= @document.id %>"
+              data-document-name="<%= @document.original_filename %>"
+              data-uploader="<%= @document.uploader_name %>"
+              data-description="<%= @document.description %>"
+              data-verify-url="<%= verify_password_document_path(@document) %>"
+              data-update-url="<%= document_path(@document) %>">
+        Update
+      </button>
+      <button type="button"
+              class="btn btn-danger"
+              data-action="document-actions#openDelete"
+              data-document-id="<%= @document.id %>"
+              data-document-name="<%= @document.original_filename %>"
+              data-verify-url="<%= verify_password_document_path(@document) %>"
+              data-delete-url="<%= document_path(@document) %>">
+        Delete
+      </button>
+    </div>
+  </article>
+
+  <dialog class="modal" data-document-actions-target="passwordDialog">
+    <form class="modal-card" data-action="submit->document-actions#verifyPassword">
+      <div class="modal-header">
+        <h2 data-document-actions-target="passwordTitle">Nhập mật khẩu file</h2>
+        <button type="button" class="modal-close" data-action="document-actions#closePassword">×</button>
+      </div>
+      <label class="field-label" for="document_action_password">Mật khẩu file</label>
+      <input id="document_action_password" type="password" class="input" data-document-actions-target="passwordInput" required>
+      <p class="form-error" data-document-actions-target="passwordError"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" data-action="document-actions#closePassword">Hủy</button>
+        <button type="submit" class="btn btn-primary">Tiếp tục</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" data-document-actions-target="editDialog">
+    <form class="modal-card" method="post" data-document-actions-target="editForm">
+      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+      <input type="hidden" name="_method" value="patch">
+      <input type="hidden" name="file_password" data-document-actions-target="editPassword">
+      <div class="modal-header">
+        <h2>Chỉnh sửa thông tin</h2>
+        <button type="button" class="modal-close" data-action="document-actions#closeEdit">×</button>
+      </div>
+      <div class="field">
+        <label class="field-label" for="edit_uploader_name">Người upload</label>
+        <input id="edit_uploader_name" name="document[uploader_name]" class="input" maxlength="100" required data-document-actions-target="editUploader">
+      </div>
+      <div class="field">
+        <label class="field-label" for="edit_description">Mô tả</label>
+        <textarea id="edit_description" name="document[description]" class="input textarea" maxlength="1000" rows="4" data-document-actions-target="editDescription"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" data-action="document-actions#closeEdit">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu</button>
+      </div>
+    </form>
+  </dialog>
+</section>
