@@ -4,17 +4,26 @@
 <div class="presenter"
      data-controller="slideshow"
      data-slideshow-url-value="<%= rails_blob_url(@document.slides_pdf) %>">
-  <div class="presenter-toolbar">
-    <button class="tb-btn" data-action="slideshow#first" title="Trang đầu (Home)">«</button>
-    <button class="tb-btn" data-action="slideshow#prev" title="Trang trước (←)">‹</button>
+  <div class="presenter-toolbar" data-slideshow-target="toolbar">
+    <button class="tb-btn" data-action="slideshow#first" title="Trang đầu (Home)" aria-label="Trang đầu">«</button>
+    <button class="tb-btn" data-action="slideshow#prev" title="Trang trước (←)" aria-label="Trang trước">‹</button>
     <span class="tb-indicator" data-slideshow-target="indicator">— / —</span>
-    <button class="tb-btn" data-action="slideshow#next" title="Trang sau (→ hoặc Space)">›</button>
-    <button class="tb-btn" data-action="slideshow#last" title="Trang cuối (End)">»</button>
-    <button class="tb-btn" data-action="slideshow#fullscreen" title="Toàn màn hình (F)">⛶</button>
+    <button class="tb-btn" data-action="slideshow#next" title="Trang sau (→ hoặc Space)" aria-label="Trang sau">›</button>
+    <button class="tb-btn" data-action="slideshow#last" title="Trang cuối (End)" aria-label="Trang cuối">»</button>
+    <button class="tb-btn" data-action="slideshow#zoomOut" title="Thu nhỏ (-)" aria-label="Thu nhỏ">−</button>
+    <button class="tb-btn" data-action="slideshow#zoomIn" title="Phóng to (+)" aria-label="Phóng to">+</button>
+    <button class="tb-btn" data-action="slideshow#togglePointer" title="Laser pointer (P)" aria-label="Laser pointer">•</button>
+    <button class="tb-btn" data-action="slideshow#toggleBlackout" title="Màn hình đen (B)" aria-label="Màn hình đen">B</button>
+    <button class="tb-btn" data-action="slideshow#fullscreen" title="Toàn màn hình (F)" aria-label="Toàn màn hình">⛶</button>
     <span class="tb-filename"><%= @document.original_filename %></span>
   </div>
-  <div class="presenter-canvas-wrap">
-    <canvas data-slideshow-target="canvas" class="slide-canvas"></canvas>
+  <div class="presenter-progress"><span data-slideshow-target="progress"></span></div>
+  <div class="presenter-stage">
+    <div class="presenter-canvas-wrap" data-slideshow-target="stage">
+      <canvas data-slideshow-target="canvas" class="slide-canvas"></canvas>
+      <div class="laser-pointer" data-slideshow-target="pointer"></div>
+      <div class="blackout" data-slideshow-target="blackout"></div>
+    </div>
+    <aside class="thumbnail-rail" data-slideshow-target="thumbs"></aside>
   </div>
-  <div class="presenter-hint">Phím tắt: <kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> <kbd>Home</kbd> <kbd>End</kbd> <kbd>F</kbd></div>
 </div>

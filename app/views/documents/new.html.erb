@@ -7,7 +7,7 @@
     <%= link_to "Danh sách", documents_path, class: "btn btn-secondary" %>
   </div>
 
-  <%= form_with model: @document, multipart: true, class: "upload-form" do |f| %>
+  <%= form_with model: @document, multipart: true, class: "upload-form", data: { controller: "upload-form" } do |f| %>
     <% if @document.errors.any? %>
       <div class="error-box">
         <strong>Có lỗi:</strong>
@@ -35,8 +35,20 @@
     </div>
 
     <div class="field">
-      <%= f.label :file, "File (.pptx / .pdf, tối đa 50MB)", class: "field-label" %>
-      <%= f.file_field :file, accept: ".pptx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation", class: "input-file" %>
+      <%= f.label :file, "File", class: "field-label" %>
+      <div class="dropzone"
+           data-upload-form-target="dropzone"
+           data-action="click->upload-form#browse dragover->upload-form#dragover dragleave->upload-form#dragleave drop->upload-form#drop">
+        <div class="dropzone-icon">⇪</div>
+        <div>
+          <strong data-upload-form-target="name">Chọn hoặc kéo file vào đây</strong>
+          <span data-upload-form-target="meta">PDF hoặc PPTX, tối đa 50MB</span>
+        </div>
+      </div>
+      <%= f.file_field :file,
+                       accept: ".pptx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                       class: "input-file sr-only",
+                       data: { upload_form_target: "input", action: "change->upload-form#update" } %>
     </div>
 
     <div class="form-actions">

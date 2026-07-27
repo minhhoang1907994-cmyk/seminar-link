@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_27_050000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_27_071000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -40,16 +40,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_27_050000) do
   end
 
   create_table "documents", force: :cascade do |t|
+    t.integer "conversion_attempts", default: 0, null: false
     t.datetime "created_at", null: false
     t.text "description"
     t.text "error_message"
     t.string "file_password_digest"
     t.string "file_password_salt"
     t.string "original_filename", null: false
+    t.string "share_token"
     t.string "status", default: "pending", null: false
     t.datetime "updated_at", null: false
     t.string "uploader_name", null: false
     t.index ["created_at"], name: "index_documents_on_created_at"
+    t.index ["share_token"], name: "index_documents_on_share_token", unique: true
     t.index ["status"], name: "index_documents_on_status"
   end
 

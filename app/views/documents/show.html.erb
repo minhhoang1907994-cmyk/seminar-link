@@ -8,26 +8,61 @@
       <%= link_to "← Danh sách", documents_path, class: "btn btn-secondary" %>
     </div>
 
-    <dl class="detail-list">
-      <dt>Người upload</dt>
-      <dd><%= @document.uploader_name %></dd>
-      <dt>Mô tả</dt>
-      <dd><%= @document.description.presence || content_tag(:span, "Không có mô tả", class: "text-muted") %></dd>
-      <dt>Trạng thái</dt>
-      <dd>
-        <span class="badge badge-<%= @document.status_badge_class %>"><%= @document.human_status %></span>
-      </dd>
-      <dt>Upload lúc</dt>
-      <dd><%= @document.created_at.strftime("%Y-%m-%d %H:%M:%S") %> (<%= time_ago_in_words(@document.created_at) %> trước)</dd>
-      <% if @document.failed? && @document.error_message.present? %>
-        <dt>Lỗi</dt>
-        <dd><pre class="error-pre"><%= @document.error_message %></pre></dd>
-      <% end %>
-    </dl>
+    <div class="detail-grid">
+      <div class="preview-panel">
+        <% if @document.slides_pdf.attached? %>
+          <div class="pdf-preview" data-controller="pdf-preview" data-pdf-preview-url-value="<%= rails_blob_url(@document.slides_pdf) %>">
+            <canvas data-pdf-preview-target="canvas"></canvas>
+            <span data-pdf-preview-target="meta">Đang tải preview...</span>
+          </div>
+        <% else %>
+          <div class="pdf-preview placeholder">
+            <span class="file-type large"><%= @document.file_extension %></span>
+            <span>Preview sẽ xuất hiện sau khi convert xong.</span>
+          </div>
+        <% end %>
+      </div>
+
+      <dl class="detail-list">
+        <dt>Người upload</dt>
+        <dd><%= @document.uploader_name %></dd>
+        <dt>Mô tả</dt>
+        <dd><%= @document.description.presence || content_tag(:span, "Không có mô tả", class: "text-muted") %></dd>
+        <dt>Trạng thái</dt>
+        <dd><span class="badge badge-<%= @document.status_badge_class %>"><%= @document.human_status %></span></dd>
+        <dt>Dung lượng</dt>
+        <dd><%= number_to_human_size(@document.file.byte_size) if @document.file.attached? %></dd>
+        <dt>Upload lúc</dt>
+        <dd><%= @document.created_at.strftime("%Y-%m-%d %H:%M:%S") %> (<%= time_ago_in_words(@document.created_at) %> trước)</dd>
+        <% if @document.presentable? && @document.share_token.present? %>
+          <dt>Link chia sẻ</dt>
+          <dd>
+            <div class="share-line">
+              <input class="input" readonly value="<%= shared_present_url(@document.share_token) %>">
+              <button type="button"
+                      class="btn btn-secondary btn-icon"
+                      title="Copy link chia sẻ"
+                      aria-label="Copy link chia sẻ"
+                      data-action="document-actions#copyShare"
+                      data-share-url="<%= shared_present_url(@document.share_token) %>">⛓</button>
+            </div>
+            <span class="copy-status" data-document-actions-target="copyStatus"></span>
+          </dd>
+        <% end %>
+        <% if @document.failed? && @document.error_message.present? %>
+          <dt>Lỗi</dt>
+          <dd>
+            <p class="error-summary"><%= @document.error_summary %></p>
+            <pre class="error-pre"><%= @document.error_message %></pre>
+          </dd>
+        <% end %>
+      </dl>
+    </div>
 
     <div class="detail-actions">
       <% if @document.presentable? %>
         <%= link_to "Mở trình chiếu", present_document_path(@document), class: "btn btn-primary", target: "_blank", rel: "noopener" %>
+        <%= link_to "Tải PDF", download_pdf_document_path(@document), class: "btn btn-secondary" if @document.slides_pdf.attached? %>
       <% elsif @document.convertible? && (@document.failed? || @document.pending?) %>
         <%= button_to "Convert lại", retry_convert_document_path(@document), method: :post, class: "btn btn-secondary" %>
       <% end %>

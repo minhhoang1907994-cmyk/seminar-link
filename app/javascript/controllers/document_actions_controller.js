@@ -12,7 +12,8 @@ export default class extends Controller {
     "editDescription",
     "editPassword",
     "errorDialog",
-    "errorText"
+    "errorText",
+    "copyStatus"
   ]
 
   openDelete(event) {
@@ -42,6 +43,17 @@ export default class extends Controller {
 
   closeError() {
     this.errorDialogTarget.close()
+  }
+
+  copyShare(event) {
+    const url = event.currentTarget.dataset.shareUrl
+    if (!url) return
+
+    navigator.clipboard.writeText(url).then(() => {
+      if (this.hasCopyStatusTarget) {
+        this.copyStatusTarget.textContent = "Đã copy link chia sẻ."
+      }
+    })
   }
 
   verifyPassword(event) {

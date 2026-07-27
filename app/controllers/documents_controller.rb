@@ -1,8 +1,28 @@
 class DocumentsController < ApplicationController
-  before_action :set_document, only: %i[show update present retry_convert verify_password destroy]
+  before_action :set_document, only: %i[show update present status download_pdf retry_convert verify_password destroy]
 
   def index
-    @documents = Document.recent.limit(100)
+    @query = params[:q].to_s.strip
+    @status_filter = params[:status].to_s
+    @sort = params[:sort].presence || "newest"
+
+    @documents = Document.with_attached_file.with_attached_slides_pdf
+    @documents = @documents.where(status: @status_filter) if Document::STATUSES.include?(@status_filter)
+
+    if @query.present?
+      like = "%#{ActiveRecord::Base.sanitize_sql_like(@query)}%"
+      @documents = @documents.where(
+        "original_filename LIKE :q OR uploader_name LIKE :q OR description LIKE :q",
+        q: like
+      )
+    end
+
+    @documents = case @sort
+                 when "oldest" then @documents.order(created_at: :asc)
+                 when "name" then @documents.order(:original_filename)
+                 when "status" then @documents.order(:status, created_at: :desc)
+                 else @documents.recent
+                 end.limit(100)
   end
 
   def new
@@ -42,7 +62,31 @@ class DocumentsController < ApplicationController
   def present
     unless @document.presentable?
       redirect_to document_path(@document), alert: "Chưa sẵn sàng (status: #{@document.status})."
+      return
     end
+  end
+
+  def shared_present
+    @document = Document.find_by!(share_token: params[:share_token])
+    unless @document.presentable?
+      redirect_to documents_path, alert: "File chưa sẵn sàng để trình chiếu."
+      return
+    end
+
+    render :present
+  end
+
+  def status
+    render json: document_status(@document)
+  end
+
+  def download_pdf
+    unless @document.slides_pdf.attached?
+      redirect_to document_path(@document), alert: "File PDF chưa sẵn sàng."
+      return
+    end
+
+    redirect_to rails_blob_path(@document.slides_pdf, disposition: "attachment")
   end
 
   def retry_convert
@@ -52,7 +96,7 @@ class DocumentsController < ApplicationController
     end
 
     if @document.failed? || @document.pending?
-      @document.update!(status: "pending", error_message: nil)
+      @document.update!(status: "pending", error_message: nil, conversion_attempts: 0)
       DocumentConvertJob.perform_later(@document.id)
       redirect_to documents_path, notice: "Đã đưa vào hàng đợi convert lại."
     else
@@ -81,6 +125,23 @@ class DocumentsController < ApplicationController
 
   def set_document
     @document = Document.find(params[:id])
+  end
+
+  def document_status(document)
+    {
+      id: document.id,
+      status: document.status,
+      human_status: document.human_status,
+      badge_class: document.status_badge_class,
+      error_summary: document.error_summary,
+      error_message: document.error_message,
+      presentable: document.presentable?,
+      processing: document.processing? || document.pending?,
+      present_url: (present_document_path(document) if document.presentable?),
+      download_url: (download_pdf_document_path(document) if document.slides_pdf.attached?),
+      share_url: (shared_present_url(document.share_token) if document.share_token.present? && document.presentable?),
+      retry_url: (retry_convert_document_path(document) if document.convertible? && (document.failed? || document.pending?))
+    }
   end
 
   def document_params
