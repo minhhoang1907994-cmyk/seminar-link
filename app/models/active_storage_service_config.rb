@@ -10,13 +10,16 @@ class ActiveStorageServiceConfig
     end
 
     def storage_root(environment = Rails.env, configured_root = ENV["ACTIVE_STORAGE_ROOT"])
-      configured_root.presence || (environment.to_s == "production" ? "/var/lib/rails/storage" : Rails.root.join("storage").to_s)
+      configured_root.presence || Rails.root.join("storage").to_s
     end
 
     def ensure_storage_directory(environment = Rails.env)
       root = storage_root(environment)
       FileUtils.mkdir_p(root)
       root
+    rescue SystemCallError
+      Rails.logger.warn("Unable to create Active Storage directory #{root}; falling back to default")
+      Rails.root.join("storage").to_s
     end
   end
 end
