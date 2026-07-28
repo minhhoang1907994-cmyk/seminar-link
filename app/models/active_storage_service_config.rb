@@ -42,7 +42,7 @@ class ActiveStorageServiceConfig
     def default_storage_root(environment)
       return Rails.root.join("storage").to_s unless environment.to_s == "production"
 
-      Rails.root.join("storage").to_s
+      "/data/storage"
     end
   end
 end

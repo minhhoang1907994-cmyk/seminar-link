@@ -26,6 +26,8 @@ services:
         sync: false
       - key: SECRET_KEY_BASE
         generateValue: true
+      - key: ACTIVE_STORAGE_ROOT
+        value: /data/storage
 
   - type: worker
     name: seminar-link-worker
@@ -52,6 +54,8 @@ services:
         sync: false
       - key: SECRET_KEY_BASE
         generateValue: true
+      - key: ACTIVE_STORAGE_ROOT
+        value: /data/storage
 
 databases:
   - name: seminar-link-db
