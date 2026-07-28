@@ -10,7 +10,7 @@ class ActiveStorageServiceConfig
     end
 
     def storage_root(environment = Rails.env, configured_root = ENV["ACTIVE_STORAGE_ROOT"])
-      configured_root.presence || "/data/storage"
+      configured_root.presence || default_storage_root(environment)
     end
 
     def ensure_storage_directory(environment = Rails.env)
@@ -18,9 +18,10 @@ class ActiveStorageServiceConfig
       FileUtils.mkdir_p(root)
       migrate_legacy_storage(root)
       root
-    rescue SystemCallError => e
-      Rails.logger.warn("Unable to create Active Storage directory #{root}: #{e.message}")
-      Rails.root.join("storage").to_s
+    rescue SystemCallError
+      fallback_root = Rails.root.join("storage").to_s
+      FileUtils.mkdir_p(fallback_root)
+      fallback_root
     end
 
     private
@@ -34,8 +35,18 @@ class ActiveStorageServiceConfig
       Dir.glob(File.join(legacy_root, "*")) do |entry|
         FileUtils.cp_r(entry, root)
       end
-    rescue SystemCallError => e
-      Rails.logger.warn("Unable to migrate Active Storage files from #{legacy_root} to #{root}: #{e.message}")
+    rescue SystemCallError
+      nil
+    end
+
+    def default_storage_root(environment)
+      return Rails.root.join("storage").to_s unless environment.to_s == "production"
+
+      if Dir.exist?("/data") && File.writable?("/data")
+        File.join("/data", "storage")
+      else
+        Rails.root.join("storage").to_s
+      end
     end
   end
 end
