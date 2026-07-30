@@ -6,6 +6,8 @@ class ActiveStorageServiceConfig
       configured_service = configured_service.presence
       return configured_service.to_sym if configured_service.present?
 
+      return :backblaze if backblaze_configured?(environment)
+
       environment.to_s == "production" ? :production : :local
     end
 
@@ -43,6 +45,14 @@ class ActiveStorageServiceConfig
       return Rails.root.join("storage").to_s unless environment.to_s == "production"
 
       "/data/storage"
+    end
+
+    def backblaze_configured?(environment)
+      return false unless environment.to_s == "production"
+
+      ENV["B2_ACCESS_KEY_ID"].present? &&
+        ENV["B2_SECRET_ACCESS_KEY"].present? &&
+        ENV["B2_BUCKET"].present?
     end
   end
 end
