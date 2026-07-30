@@ -19,9 +19,7 @@ services:
       - key: SOLID_QUEUE_IN_PUMA
         value: false
       - key: DATABASE_URL
-        fromDatabase:
-          name: seminar-link-db
-          property: connectionString
+        value: "postgresql://neondb_owner:npg_flPU76EYJLAt@ep-lively-wildflower-a6zkr3em.us-west-2.aws.neon.tech/neondb?sslmode=require"
       - key: RAILS_MASTER_KEY
         sync: false
       - key: SECRET_KEY_BASE
@@ -47,9 +45,7 @@ services:
       - key: BUNDLE_WITHOUT
         value: development:test
       - key: DATABASE_URL
-        fromDatabase:
-          name: seminar-link-db
-          property: connectionString
+        value: "postgresql://neondb_owner:npg_flPU76EYJLAt@ep-lively-wildflower-a6zkr3em.us-west-2.aws.neon.tech/neondb?sslmode=require"
       - key: RAILS_MASTER_KEY
         sync: false
       - key: SECRET_KEY_BASE
@@ -57,7 +53,3 @@ services:
       - key: ACTIVE_STORAGE_ROOT
         value: /data/storage
 
-databases:
-  - name: seminar-link-db
-    databaseName: seminar_link_production
-    plan: starter
