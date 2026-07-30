@@ -10,6 +10,7 @@ Rails.application.routes.draw do
       get  :present
       get  :status
       get  :download_pdf
+      get  :pdf_content
       post :retry_convert
       post :verify_password
     end

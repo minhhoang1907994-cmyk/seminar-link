@@ -1,5 +1,5 @@
 class DocumentsController < ApplicationController
-  before_action :set_document, only: %i[show update present status download_pdf retry_convert verify_password destroy]
+  before_action :set_document, only: %i[show update present status download_pdf pdf_content retry_convert verify_password destroy]
 
   def index
     @query = params[:q].to_s.strip
@@ -81,12 +81,11 @@ class DocumentsController < ApplicationController
   end
 
   def download_pdf
-    unless @document.slides_pdf.attached?
-      redirect_to document_path(@document), alert: "File PDF chưa sẵn sàng."
-      return
-    end
+    serve_pdf(disposition: :attachment)
+  end
 
-    redirect_to polymorphic_path(@document.slides_pdf, disposition: :attachment)
+  def pdf_content
+    serve_pdf(disposition: params[:disposition].presence || :inline)
   end
 
   def retry_convert
@@ -150,5 +149,23 @@ class DocumentsController < ApplicationController
 
   def update_params
     params.require(:document).permit(:uploader_name, :description)
+  end
+
+  def serve_pdf(disposition:)
+    unless @document.slides_pdf.attached?
+      head :not_found
+      return
+    end
+
+    disposition = disposition.to_s
+    disposition = "inline" unless %w[inline attachment].include?(disposition)
+
+    data = @document.slides_pdf.download
+    send_data(
+      data,
+      filename: @document.slides_pdf.filename.to_s,
+      type: @document.slides_pdf.content_type,
+      disposition: disposition
+    )
   end
 end
