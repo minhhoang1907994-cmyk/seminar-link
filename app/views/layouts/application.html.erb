@@ -16,7 +16,7 @@
     <link rel="apple-touch-icon" href="/icon.png">
 
     <% presenter_layout = content_for?(:presenter_layout) %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <% unless presenter_layout %>
       <%= javascript_importmap_tags %>
     <% end %>
@@ -24,17 +24,37 @@
 
   <body class="<%= 'presenter-body' if presenter_layout %>">
     <% unless presenter_layout %>
-      <header class="site-header">
-        <nav class="site-nav">
-          <%= link_to "Seminar Link", root_path, class: "site-brand" %>
-        </nav>
-      </header>
-      <main class="site-main">
-        <% flash.each do |key, value| %>
-          <div class="flash flash-<%= key %>"><%= value %></div>
-        <% end %>
-        <%= yield %>
-      </main>
+      <div class="app-container">
+        <header class="site-header">
+          <%= link_to root_path, class: "site-brand-link", aria: { label: "Về trang chủ" } do %>
+            <span class="site-logo-mark" aria-hidden="true">
+              <span class="logo-dot"></span>
+              <span class="logo-bar"></span>
+              <span class="logo-bar short"></span>
+            </span>
+            <span class="site-brand-text">Seminar Link</span>
+          <% end %>
+        </header>
+
+        <div class="app-body">
+          <aside class="app-sidebar">
+            <nav class="sidebar-nav">
+              <div class="nav-section">
+                <div class="nav-section-title">Tài liệu</div>
+                <%= link_to "Tất cả tài liệu", root_path, class: "nav-link #{' active' if current_page?(root_path)}" %>
+                <%= link_to "Upload file", new_document_path, class: "nav-link #{' active' if current_page?(new_document_path)}" %>
+              </div>
+            </nav>
+          </aside>
+
+          <main class="site-main">
+            <% flash.each do |key, value| %>
+              <div class="flash flash-<%= key %>"><%= value %></div>
+            <% end %>
+            <%= yield %>
+          </main>
+        </div>
+      </div>
     <% else %>
       <%= yield %>
       <%= javascript_importmap_tags %>
