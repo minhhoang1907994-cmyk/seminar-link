@@ -11,7 +11,7 @@
     <div class="detail-grid">
       <div class="preview-panel">
         <% if @document.slides_pdf.attached? %>
-          <div class="pdf-preview" data-controller="pdf-preview" data-pdf-preview-url-value="<%= url_for(@document.slides_pdf) %>">
+          <div class="pdf-preview" data-controller="pdf-preview" data-pdf-preview-url-value="<%= polymorphic_path(@document.slides_pdf, disposition: :inline) %>">
             <canvas data-pdf-preview-target="canvas"></canvas>
             <span data-pdf-preview-target="meta">Đang tải preview...</span>
           </div>

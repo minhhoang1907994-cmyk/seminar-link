@@ -86,7 +86,7 @@ class DocumentsController < ApplicationController
       return
     end
 
-    redirect_to rails_blob_path(@document.slides_pdf, disposition: "attachment")
+    redirect_to polymorphic_path(@document.slides_pdf, disposition: :attachment)
   end
 
   def retry_convert

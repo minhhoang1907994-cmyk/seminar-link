@@ -16,7 +16,7 @@ backblaze:
   secret_access_key: <%= ENV['B2_SECRET_ACCESS_KEY'] %>
   region: <%= ENV.fetch('B2_REGION', 'us-east-005') %>
   bucket: <%= ENV['B2_BUCKET'] %>
-  endpoint: <%= ENV.fetch('B2_ENDPOINT', 's3.us-east-005.backblazeb2.com') %>
+  endpoint: <%= ENV.fetch('B2_ENDPOINT', 'https://s3.us-east-005.backblazeb2.com') %>
   force_path_style: true
 
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)

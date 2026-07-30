@@ -3,7 +3,7 @@
 
 <div class="presenter"
      data-controller="slideshow"
-     data-slideshow-url-value="<%= url_for(@document.slides_pdf) %>">
+     data-slideshow-url-value="<%= polymorphic_path(@document.slides_pdf, disposition: :inline) %>">
   <div class="presenter-toolbar" data-slideshow-target="toolbar">
     <button class="tb-btn" data-action="slideshow#first" title="Trang đầu (Home)" aria-label="Trang đầu">«</button>
     <button class="tb-btn" data-action="slideshow#prev" title="Trang trước (←)" aria-label="Trang trước">‹</button>
